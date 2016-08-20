@@ -1,0 +1,166 @@
+#!/usr/bin/env powscript
+
+if not $(uname -o) is "GNU/Linux"
+  echo -e "\nCurrently only Linux is supported.\n"
+  exit 1
+
+export AutoYes=false
+if $1 is "-y"
+  AutoYes=true
+
+ask(prompt, default)
+  if $AutoYes is true
+    return 0
+  else
+    local choices="[Y/n]"
+    if $default is y or $default is ""
+      choices="[Y/n]"
+    elif $default is n
+      choices="[y/N]"
+    else
+      echo "Invalid default argument to ask: $default"
+      exit 1
+    res="$(printf "$prompt $choices")"
+    read -p "$res " answer
+    if $answer match ([Yy](es)?|YES)
+      return 0
+    elif $answer match ([Nn]o?|NO)
+      return 1
+    elif $answer is ""
+      if $default is n
+        return 0
+      else
+        return 1
+    else
+      ask $prompt $default
+
+
+if -d ~/.restnote
+  if ask "\nDo you want to reinstall the restnote dependencies?" n
+    echo
+  else
+    exit 0
+  rm -r ~/.restnote
+else
+  echo -e "\nThe following programs will be installed:"
+  echo -e "Globally:"
+  if not -x $(command -v jupyter)
+    echo "  jupyter"
+  if not -x $(command -v restview)
+    echo "  restview"
+  echo -e "Locally (at $HOME/.rstnote):"
+  if not -x $(command -v python3)
+    echo "  python3"
+  if not -x $(command -v pip3)
+    echo "  pip3"
+  if not -x $(command -v node)
+    echo "  nodejs"
+  if not -x $(command -v nw)
+    echo "  nw"
+  echo "  restnote"
+  echo "If you want to install any of them yourself please do so before proceeding."
+  if ask "continue?" y
+    echo
+  else
+    exit 0
+
+
+echo -e "\nInstalling dependencies...\n"
+cd ~
+
+if not -x .restnote
+  mkdir .restnote || exit 1
+
+cd .restnote
+
+if not -x bin
+  mkdir bin || exit 1
+
+if not -x $(command -v xz)
+  echo "Downloading xz..."
+  wget "http://tukaani.org/xz/xz-5.2.2.tar.gz" -O "xz.tar.gz"
+  tar -xvf "xz.tar.gz"
+  cd xz
+  ./configure
+  make
+  cd ..
+  unxz="xz/bin/unxz"
+else
+  unxz="unxz"
+
+if not -x $(command -v npm)
+  if not -x ./node-v*
+    echo "Downloading node.js..."
+    wget "https://nodejs.org/dist/v6.3.0/node-v6.3.0-linux-x64.tar.xz" -O "node.tar.xz"
+    $unxz "node.tar.xz"
+    tar -xvf "node.tar"
+    rm "node.tar"
+  if not -x ./node_modules/nwjs
+    echo -e "\nInstalling nw.js locally..."
+    mkdir "node_modules"
+    ./node-v*/bin/node ./node-v*/bin/npm install "nw"
+
+installpip="no"
+installjupyter="no"
+installrestview="no"
+
+if not -x $(command -v 'restview')
+  installpip="yes"
+  installrestview="yes"
+
+if not -x $(command -v 'jupyter')
+  installpip="yes"
+  installjupyter="yes"
+
+if -x $(command -v 'pip3')
+  installpip="no"
+
+PYTHON_BINDIR=""
+
+if $installpip is "yes"
+  if not -x $(command -v 'python3')
+    echo -e "\nDownloading python 3 with pip..."
+    wget "https://www.python.org/ftp/python/3.5.2/Python-3.5.2.tar.xz" -O "python3.tar.xz"
+    $unxz "python3.tar.xz"
+    tar -xvf "python3.tar"
+    rm "python3.tar"
+    mkdir python3
+    cd ./Py*
+    echo -e "\nBuilding python 3..."
+    ./configure
+    make
+    make altinstall prefix="~/.restnote/python3" exec-prefix="~/.restnote/python3"
+    cd ..
+    echo -e "\nInstalling pip locally..."
+    ./python3/bin/python3.5 -m ensurepip
+    echo -e "#!/usr/bin/env sh\n\n~/.restnote/python3/bin/python3.5 -m pip \$@" > pip.sh
+    PYTHON_BINDIR=~/.restnote/python3/bin
+  else
+    echo -e "\nDownloading pip..."
+    wget "https://bootstrap.pypa.io/get-pip.py" -O "get-pip.py"
+    echo -e "\nInstalling pip locally..."
+    python3 get-pip.py
+    echo -e "#!/usr/bin/env sh\n\npython3 -m pip \$@" > pip.sh
+    PYTHON_BINDIR=$(dirname $(command -v python3))
+  ##
+else
+  PYTHON_BINDIR=$(pip3 -V | grep -o -P "/.*/(?=lib)" | echo "$(cat)bin")
+  echo -e "#!/usr/bin/env sh\n\npip3 \$@" > pip.sh
+
+chmod +x pip.sh
+
+if $installjupyter is "yes"
+  echo -e "\nInstalling jupyter..."
+  ./pip.sh install jupyter
+
+if $installrestview is "yes"
+  echo -e "\nInstalling restview..."
+  ./pip.sh install restview
+
+ln -s "${PYTHON_BINDIR}/restview" ~/.restnote/bin/restview
+ln -s "${PYTHON_BINDIR}/jupyter"  ~/.restnote/bin/jupyter
+ln -s "$(readlink -m $(dirname $0))/restnote.sh"  ~/.restnote/bin/restnote
+
+echo -e "\nInstallation sucessful! You may now run restnote with '$(dirname $0)/restnote.sh'"
+
+exit 0

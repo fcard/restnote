@@ -1,0 +1,10 @@
+{
+  "name": "rst-notebook-compiler",
+  "main": "index.html",
+  "version": "0.1.0",
+  "window": {
+    "width": 800,
+    "height":600,
+    "toolbar":true
+  }
+}

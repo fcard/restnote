@@ -1,0 +1,12 @@
+#!/usr/bin/env powscript
+
+if -d ~/.rstnote/
+  cd "$(dirname $0)/src"
+  if not -x $(command -v nw)
+    NW=~/.restnote/node_modules/nwjs/nw
+  else
+    NW=nw
+  PATH="$PATH:$HOME/.restnote/bin" $NW .
+else
+  echo -e "\nYou need to run deps.sh before you can use the program!\n"
+

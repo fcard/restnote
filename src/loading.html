@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <style>
+      @keyframes dot_sequence1 {
+          0% {opacity:0.1}
+         10% {opacity:0.7}
+         34% {opacity:0.9}
+         51% {opacity:1}
+         88% {opacity:1}
+        100% {opacity:0}
+      }
+      @keyframes dot_sequence2 {
+          0% {opacity:0}
+         10% {opacity:0.1}
+         34% {opacity:0.7}
+         51% {opacity:0.9}
+         75% {opacity:1}
+         88% {opacity:1}
+        100% {opacity:0}
+      }
+      @keyframes dot_sequence3 {
+          0% {opacity:0}
+         10% {opacity:0}
+         34% {opacity:0.1}
+         51% {opacity:0.7}
+         75% {opacity:0.9}
+         88% {opacity:1}
+        100% {opacity:0}
+      }
+      @keyframes color_anim {
+        from {color: rgb(140,140,190)}
+        50%  {color: rgb(190,190,230)}
+        to   {color: rgb(140,140,190)}
+      }
+      @keyframes background_anim {
+        from {background-color: rgb(230,230,230)}
+        50%  {background-color: rgb(255,255,255)}
+        to   {background-color: rgb(230,230,230)}
+      }
+
+      body {
+        background-color: rgba(40,40,40,0.7);
+      }
+
+      #background {
+        position: absolute;
+        width: 240px;
+        height: 100px;
+        top: 20%;
+        left: 50%;
+        margin-right: -50%;
+        padding-left: 65px;
+        padding-bottom: 50px;
+        border-radius: 30%;
+        transform: translate(-50%,0);
+        background-color: rgba(230,230,230,1);
+        opacity: 1;
+        animation-name: background_anim;
+        animation-duration: 4s;
+        animation-iteration-count: infinite;
+      }
+
+      #text {
+        font-size: 48px;
+        animation-name: color_anim;
+        animation-duration: 2s;
+        animation-iteration-count: infinite;
+      }
+      #dot1 {
+        animation-name: color_anim, dot_sequence1;
+        animation-duration: 2s, 3s;
+        animation-iteration-count: infinite;
+      }
+      #dot2 {
+        animation-name: color_anim, dot_sequence2;
+        animation-duration: 2s, 3s;
+        animation-iteration-count: infinite;
+      }
+      #dot3 {
+        animation-name: color_anim, dot_sequence3;
+        animation-duration: 2s, 3s;
+        animation-iteration-count: infinite;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="background">
+      <p id="text">
+        Loading<em id="dot1">.</em><em id="dot2">.</em><em id="dot3">.</em>
+      </p>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,58 @@
+#notebook-content[type="none"] #notebook-editor,
+#notebook-content[type="none"] #notebook-previewer {
+  display: none;
+}
+
+#notebook-content[type="editor"] #notebook-previewer {
+  display: none;
+}
+
+#notebook-content[type="previewer"] #notebook-editor {
+  display: none;
+}
+
+#notebook-content[type="editor"] #notebook-editor {
+}
+
+#notebook-content[type="previewer"] #notebook-previewer {
+}
+
+#notebook-content[loading="false"] #loading-screen {
+  display: none;
+}
+
+#notebook-content[loading="true"] #loading-screen {
+  z-index: 999;
+  opacity: 1;
+}
+
+body {
+  width:  calc(800px - 40px);
+  height: calc(600px - 76px);
+}
+
+#file-notebook-select {
+  width: 80%;
+}
+
+#command-buttons {
+  margin-top: 4px;
+  height: 10%;
+}
+
+#notebook-content {
+  width:  100%;
+  height: 100%;
+  margin: 8px;
+}
+
+#notebook-content * {
+  width:  100%;
+  height: 100%;
+}
+
+#notebook-content > * {
+  width: calc(100% - 32px);
+  height: calc(100% - 24px - 10%);
+  position: absolute;
+}

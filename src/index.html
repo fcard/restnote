@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" media="screen" href="markup.css"/>
+  </head>
+  <body>
+    <div id="file-manipulation">
+      <input id="file-notebook-select" type="file">
+      <div id="command-buttons">
+        <input id="edit-notebook-button" type="button" value="Edit">
+        <input id="comp-notebook-button" type="button" value="Compile">
+        <input id="prev-notebook-button" type="button" value="Preview">
+      </div>
+    </div>
+    <div id="notebook-content" type="none" loading="false">
+      <div id="loading">
+        <iframe id="loading-screen" frameborder="0" src="loading.html"></iframe>
+      </div>
+      <div id="notebook-editor">
+        <iframe id="edit-notebook-screen" src="" sandbox="allow-scripts allow-same-origin"></iframe>
+      </div>
+      <div id="notebook-previewer">
+        <iframe id="prev-notebook-screen" src="" sandbox="allow-scripts allow-same-origin"></iframe>
+      </div>
+    </div>
+    <script src="script/main.js"></script>
+  </body>
+</html>
