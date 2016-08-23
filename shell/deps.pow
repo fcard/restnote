@@ -1,5 +1,17 @@
 #!/usr/bin/env powscript
 
+VERSION="0.1.1"
+
+VersionLocation=~/.restnote/VERSION
+
+if -d ~/.restnote
+  if -e $VersionLocation
+    INSTALLED_VERSION=$(cat < $VersionLocation)
+  else
+    INSTALLED_VERSION="0.1.0"
+else
+  INSTALLED_VERSION="0.0.0"
+
 if not $(uname -o) is "GNU/Linux"
   echo -e "\nCurrently only Linux is supported.\n"
   exit 1
@@ -27,20 +39,36 @@ ask(prompt, default)
     elif $answer match ([Nn]o?|NO)
       return 1
     elif $answer is ""
-      if $default is n
+      if $default is y
         return 0
       else
         return 1
     else
       ask $prompt $default
 
-
-if -d ~/.restnote
-  if ask "\nDo you want to reinstall the restnote dependencies?" n
-    echo
+add_nw_node_links()
+  if -x $(command -v node)
+    ln -s "$(command -v node)" ~/.restnote/bin/node
   else
+    ln -s ~/.restnote/node-*/bin/node ~/.restnote/bin/node
+  if -x $(command -v nw)
+    ln -s "$(command -v nw)" ~/.restnote/bin/nw
+  else
+    ln -s ~/.restnote/node_modules/nw/bin/nw ~/.restnote/bin/nw
+
+
+if not $VERSION is "0.0.0"
+  if $INSTALLED_VERSION is $VERSION
+    if ask "\nDo you want to reinstall the restnote dependencies?" n
+      echo
+    else
+      exit 0
+  elif $INSTALLED_VERSION is "0.1.0"
+    echo "Upgrading..."
+    add_nw_node_links
+    echo "Done!"
+    echo $VERSION > $VersionLocation
     exit 0
-  rm -r ~/.restnote
 else
   echo -e "\nThe following programs will be installed:"
   echo -e "Globally:"
@@ -68,35 +96,38 @@ else
 echo -e "\nInstalling dependencies...\n"
 cd ~
 
-if not -x .restnote
-  mkdir .restnote || exit 1
+if -d .restnote
+  rm -r .restnote
 
+mkdir .restnote || exit 1
 cd .restnote
 
-if not -x bin
+echo "0.0.0" > "$VersionLocation"
+
+if not -d bin
   mkdir bin || exit 1
 
 if not -x $(command -v xz)
   echo "Downloading xz..."
   wget "http://tukaani.org/xz/xz-5.2.2.tar.gz" -O "xz.tar.gz"
   tar -xvf "xz.tar.gz"
-  cd xz
+  cd xz-*
   ./configure
   make
   cd ..
-  unxz="xz/bin/unxz"
+  XZ=~/xz-*/src/xz/xz
 else
-  unxz="unxz"
+  XZ="xz"
 
 if not -x $(command -v npm)
-  if not -x ./node-v*
+  if not -d ./node-v*
     echo "Downloading node.js..."
     wget "https://nodejs.org/dist/v6.3.0/node-v6.3.0-linux-x64.tar.xz" -O "node.tar.xz"
-    $unxz "node.tar.xz"
+    $XZ -d "node.tar.xz"
     tar -xvf "node.tar"
     rm "node.tar"
-  if not -x ./node_modules/nwjs
-    echo -e "\nInstalling nw.js locally..."
+  if not -d ./node_modules/nw
+    echo -e "\nInstalling nw.js locally... (might take a while)"
     mkdir "node_modules"
     ./node-v*/bin/node ./node-v*/bin/npm install "nw"
 
@@ -121,7 +152,7 @@ if $installpip is "yes"
   if not -x $(command -v 'python3')
     echo -e "\nDownloading python 3 with pip..."
     wget "https://www.python.org/ftp/python/3.5.2/Python-3.5.2.tar.xz" -O "python3.tar.xz"
-    $unxz "python3.tar.xz"
+    $XZ -d "python3.tar.xz"
     tar -xvf "python3.tar"
     rm "python3.tar"
     mkdir python3
@@ -160,6 +191,9 @@ if $installrestview is "yes"
 ln -s "${PYTHON_BINDIR}/restview" ~/.restnote/bin/restview
 ln -s "${PYTHON_BINDIR}/jupyter"  ~/.restnote/bin/jupyter
 ln -s "$(readlink -m $(dirname $0))/restnote.sh"  ~/.restnote/bin/restnote
+add_nw_node_links
+
+echo $VERSION > "$VersionLocation"
 
 echo -e "\nInstallation sucessful! You may now run restnote with '$(dirname $0)/restnote.sh'"
 
