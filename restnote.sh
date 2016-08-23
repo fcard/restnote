@@ -9,14 +9,8 @@ tmpfile="/tmp/$(basename $0).tmp.$(whoami)"
 
 
 
-if [[ -d ~/.rstnote/ ]]; then
-  cd "$(dirname "$0")/src"
-  if [[ ! -x "$(command -v nw)" ]]; then
-    NW=~/.restnote/node_modules/nwjs/nw
-  else
-    NW=nw
-  fi
-  PATH="$PATH:$HOME/.restnote/bin" "$NW" .
+if [[ -d "$HOME/.restnote/" ]]; then
+  PATH="$PATH:$HOME/.restnote/bin" nw "$selfpath/src"
 else
   echo -e "\nYou need to run deps.sh before you can use the program!\n"
 fi
@@ -26,8 +20,8 @@ fi
 
 
 # cleanup tmp files
-if ls /tmp/$(basename $0).tmp.fabio* &>/dev/null; then
-  for f in /tmp/$(basename $0).tmp.fabio*; do rm $f; done
+if ls /tmp/$(basename $0).tmp.$(whoami)* &>/dev/null; then
+  for f in /tmp/$(basename $0).tmp.$(whoami)*; do rm $f; done
 fi
 
 exit 0
